@@ -98,6 +98,11 @@ class Game:
             if game.lives > 0:
                 snake.x, snake.y = level.snake_cords[0], level.snake_cords[1]
                 snake.body = [(snake.x, snake.y)]
+                snake.dx = 0
+                snake.dy = 0
+                snake.dirs = {'W': True, 'S': True, 'A': True, 'D': True, }
+                snake.length = 1
+                game.fps_control.tick(game.fps - 9)
                 return
             while True:
                 render_end = BIG_FONT.render('PRESS SPACE TO RESTART', 1, pygame.Color('red'))
@@ -257,12 +262,12 @@ class Level:
         self.snake_cords = (0, 0)
 
     def check_new_level(self, snake, game):
-        if snake.length > 5 and game.score > 5 and self.type == 1:
+        if snake.length > 5 and game.score > 10 and self.type == 1:
             self.type = 2
             self.walls.clear()
             self.portals.clear()
             return True
-        if snake.length > 10 and game.score > 10 and self.type == 2:
+        if snake.length > 10 and game.score > 20 and self.type == 2:
             self.type = 3
             self.walls.clear()
             self.portals.clear()
@@ -329,14 +334,14 @@ def main():
             snake.move_snake(game)
             # eating food
             snake.eat_food(game, level.walls, level.portals, apple, speed_up_bonus, speed_down_bonus)
-            # game over
-            game.game_over(surface, snake, level.walls, game, level)
             # screen refresh
             game.refresh_screen()
             # close window if X button id pressed
             game.close_game()
             # controls handler
             game.controls(snake)
+            # game over
+            game.game_over(surface, snake, level.walls, game, level)
             # transition to new level
             if level.check_new_level(snake, game):
                 break
