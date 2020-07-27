@@ -17,15 +17,15 @@ is_portal_add = False
 DELAY = 60
 
 
-def save_level(level_name, walls, portals):
-    """Function save walls and portals cords to .txt file"""
-    with open(level_name, "w") as file:
+def save_level(level_path, walls, portals):
+    """Function save walls, portals and snake cords to .txt file"""
+    with open(level_path, "w") as file:
         for w in walls:
             print('w' + str(w), file=file)
         for p in portals:
             print('p' + str(p), file=file)
         print('s' + str(SNAKE_CORDS), file=file)
-        print(f'{level_name} was saved!')
+        print(f'{level_path.split("/")[1]} was saved!')
 
 
 def is_all_conditions(block, walls, portals_tmp, portals):
@@ -142,9 +142,9 @@ while True:
             is_snake_add = False
             is_portal_add = False
         if key[pygame.K_q]:
-            save_level('level1.txt', WALLS, PORTALS)
+            save_level('levels/level1.txt', WALLS, PORTALS)
         if key[pygame.K_w]:
-            save_level('level2.txt', WALLS, PORTALS)
+            save_level('levels/level2.txt', WALLS, PORTALS)
         if key[pygame.K_e]:
-            save_level('level3.txt', WALLS, PORTALS)
+            save_level('levels/level3.txt', WALLS, PORTALS)
         pygame.time.Clock().tick(DELAY)
