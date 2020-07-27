@@ -7,10 +7,10 @@ WIDTH = 1400
 HEIGHT = 800
 CELL_SIZE = 40
 EYE_SIZE = 10
-SOUND_DEATH = pygame.mixer.Sound('death.wav')
-SOUND_EAT = pygame.mixer.Sound('mmm.wav')
-IMAGE = pygame.image.load('bg.png')
-ICON = pygame.image.load('icon.png')
+SOUND_DEATH = pygame.mixer.Sound('resources/death.wav')
+SOUND_EAT = pygame.mixer.Sound('resources/mmm.wav')
+IMAGE = pygame.image.load('resources/bg.png')
+ICON = pygame.image.load('resources/icon.png')
 NOT_BIG_FONT = pygame.font.SysFont('Arial', 26, bold=True)
 BIG_FONT = pygame.font.SysFont('Arial', 66, bold=True)
 
@@ -291,11 +291,11 @@ class Level:
 
     def load_level(self, wall, portals):
         if self.type == 1:
-            self.parse_level_txt('level1.txt', wall, portals)
+            self.parse_level_txt('levels/level1.txt', wall, portals)
         elif self.type == 2:
-            self.parse_level_txt('level2.txt', wall, portals)
+            self.parse_level_txt('levels/level2.txt', wall, portals)
         elif self.type == 3:
-            self.parse_level_txt('level3.txt', wall, portals)
+            self.parse_level_txt('levels/level3.txt', wall, portals)
 
 
 def main():
