@@ -18,10 +18,14 @@ pygame.display.set_caption('SHAKE IT')
 pygame.display.set_icon(ICON)
 
 
+def clear_line(line, start_letter):
+    return line.replace(start_letter, '').replace('(', '').replace(')', '').replace(',', '')
+
+
 class Game:
     def __init__(self):
         self.fps_control = pygame.time.Clock()
-        self.fps = 11
+        self.fps = 10
         self.score = 0
         self.lives = 3
         self.is_paused = False
@@ -133,20 +137,31 @@ class Snake:
                           (i, j, CELL_SIZE - 1, CELL_SIZE - 1)) for i, j in self.body]
         if not self.dirs['S']:
             pygame.draw.rect(surface, pygame.Color(self.eye_color),
-                             (self.x, self.y + CELL_SIZE - EYE_SIZE - 2, EYE_SIZE, EYE_SIZE))
+                             (self.x,
+                              self.y + CELL_SIZE - EYE_SIZE - 2,
+                              EYE_SIZE, EYE_SIZE))
             pygame.draw.rect(surface, pygame.Color(self.eye_color),
-                             (self.x + CELL_SIZE - EYE_SIZE - 1, self.y + CELL_SIZE - EYE_SIZE - 2, EYE_SIZE, EYE_SIZE))
+                             (self.x + CELL_SIZE - EYE_SIZE - 1,
+                              self.y + CELL_SIZE - EYE_SIZE - 2,
+                              EYE_SIZE, EYE_SIZE))
         elif not self.dirs['W']:
             pygame.draw.rect(surface, pygame.Color(self.eye_color),
-                             (self.x, self.y + 1, EYE_SIZE, EYE_SIZE))
+                             (self.x,
+                              self.y + 1,
+                              EYE_SIZE, EYE_SIZE))
             pygame.draw.rect(surface, pygame.Color(self.eye_color),
-                             (self.x + CELL_SIZE - EYE_SIZE - 1, self.y + 1, EYE_SIZE, EYE_SIZE))
+                             (self.x + CELL_SIZE - EYE_SIZE - 1,
+                              self.y + 1,
+                              EYE_SIZE, EYE_SIZE))
         elif not self.dirs['D']:
             pygame.draw.rect(surface, pygame.Color(self.eye_color),
-                             (self.x + CELL_SIZE - EYE_SIZE - 1, self.y + 1, EYE_SIZE, EYE_SIZE))
+                             (self.x + CELL_SIZE - EYE_SIZE - 1,
+                              self.y + 1, EYE_SIZE, EYE_SIZE))
         elif not self.dirs['A']:
             pygame.draw.rect(surface, pygame.Color(self.eye_color),
-                             (self.x, self.y + 1, EYE_SIZE, EYE_SIZE))
+                             (self.x,
+                              self.y + 1,
+                              EYE_SIZE, EYE_SIZE))
 
     def eat_food(self, game, portals, walls, *food):
         for piece in food:
@@ -163,7 +178,10 @@ class Snake:
             self.body = self.body[-self.length:]
 
     def check_death(self, walls):
-        if self.x < 0 or self.x > WIDTH - CELL_SIZE or self.y < 0 or self.y > HEIGHT - CELL_SIZE \
+        if self.x < 0\
+                or self.x > WIDTH - CELL_SIZE\
+                or self.y < 0\
+                or self.y > HEIGHT - CELL_SIZE\
                 or len(self.body) != len(set(self.body)) \
                 or True in [wall.check_collision_with_wall(self) for wall in walls]:
             return True
@@ -186,11 +204,11 @@ class Food:
         for piece in other_food:
             food_cords.append((piece.x, piece.y))
         while not collision:
-            x, y = randrange(CELL_SIZE, WIDTH - CELL_SIZE, CELL_SIZE), \
+            x, y = randrange(CELL_SIZE, WIDTH - CELL_SIZE, CELL_SIZE),\
                    randrange(CELL_SIZE, HEIGHT - CELL_SIZE, CELL_SIZE)
-            if (x, y) not in snake.body \
-                    and (x, y) not in portal_cords \
-                    and (x, y) not in food_cords \
+            if (x, y) not in snake.body\
+                    and (x, y) not in portal_cords\
+                    and (x, y) not in food_cords\
                     and (x, y) not in [(wall.x, wall.y) for wall in walls]\
                     and (x, y) not in [(portal.f_x, portal.f_y) for portal in portals]\
                     and (x, y) not in [(portal.s_x, portal.s_y) for portal in portals]:
@@ -212,13 +230,15 @@ class SpeedUp(Food):
 class SpeedDown(Food):
     def give_bonus(self, snake, game):
         # lower fps is bad for game experience
-        if game.fps > 10:
+        if game.fps > 8:
             game.fps -= 2
         game.score -= 1
 
 
 class Portal:
-    def __init__(self, first_x, first_y, second_x, second_y, first_color, second_color):
+    def __init__(self, first_x, first_y,
+                 second_x, second_y,
+                 first_color, second_color):
         self.f_color = first_color
         self.s_color = second_color
         self.f_x = first_x
@@ -274,18 +294,23 @@ class Level:
             return True
 
     def parse_level_txt(self, level, wall, portals):
+        # basic snake position if not snake in level
+        self.snake_cords = 0, 0
         with open(level, 'r') as file:
             for line in file:
                 if line[0] == 'w':
-                    line = line.replace('w', '').replace('(', '').replace(')', '').replace(',', '')
+                    line = clear_line(line, 'w')
                     x, y = line.split(' ')
                     self.walls.append(Wall(int(x), int(y), wall.color))
                 if line[0] == 'p':
-                    line = line.replace('p', '').replace('(', '').replace(')', '').replace(',', '')
+                    line = clear_line(line, 'p')
                     fx, fy, sx, sy = line.split(' ')
-                    self.portals.append(Portal(int(fx), int(fy), int(sx), int(sy), portals.f_color, portals.s_color))
+                    self.portals.append(Portal(int(fx), int(fy),
+                                               int(sx), int(sy),
+                                               portals.f_color,
+                                               portals.s_color))
                 if line[0] == 's':
-                    line = line.replace('s', '').replace('(', '').replace(')', '').replace(',', '')
+                    line = clear_line(line, 's')
                     x, y = line.split(' ')
                     self.snake_cords = int(x), int(y)
 
@@ -306,15 +331,19 @@ def main():
     level = Level()
     while True:
         level.load_level(w, p)
-        snake = Snake(level.snake_cords[0], level.snake_cords[1], 'orange', 'white')
+        snake = Snake(level.snake_cords[0], level.snake_cords[1],
+                      'orange', 'white')
         apple = Food(0, 0, 'red')
         speed_up_bonus = SpeedUp(0, 0, 'yellow')
         speed_down_bonus = SpeedDown(0, 0, 'midnightblue')
 
         # initialize food
-        apple.spawn_food(snake, level.portals, level.walls, speed_up_bonus, speed_down_bonus)
-        speed_up_bonus.spawn_food(snake, level.portals, level.walls, speed_up_bonus, speed_down_bonus)
-        speed_down_bonus.spawn_food(snake, level.portals, level.walls, speed_up_bonus, speed_down_bonus)
+        apple.spawn_food(snake, level.portals, level.walls,
+                         speed_up_bonus, speed_down_bonus)
+        speed_up_bonus.spawn_food(snake, level.portals, level.walls,
+                                  speed_up_bonus, speed_down_bonus)
+        speed_down_bonus.spawn_food(snake, level.portals, level.walls,
+                                    speed_up_bonus, speed_down_bonus)
 
         while True:
             # drawing bg image
@@ -333,7 +362,8 @@ def main():
             # snake movement
             snake.move_snake(game)
             # eating food
-            snake.eat_food(game, level.walls, level.portals, apple, speed_up_bonus, speed_down_bonus)
+            snake.eat_food(game, level.walls, level.portals,
+                           apple, speed_up_bonus, speed_down_bonus)
             # screen refresh
             game.refresh_screen()
             # close window if X button id pressed
