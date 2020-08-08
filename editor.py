@@ -14,7 +14,6 @@ portals_temp = []
 SNAKE_CORDS = ()
 is_snake_add = False
 is_portal_add = False
-DELAY = 60
 
 
 def save_level(level_path, walls, portals):
@@ -24,7 +23,8 @@ def save_level(level_path, walls, portals):
             print('w' + str(w), file=file)
         for p in portals:
             print('p' + str(p), file=file)
-        print('s' + str(SNAKE_CORDS), file=file)
+        if is_snake_add:
+            print('s' + str(SNAKE_CORDS), file=file)
         print(f'{level_path.split("/")[1]} was saved!')
 
 
@@ -43,19 +43,32 @@ for row in range(int(HEIGHT / CELL_SIZE)):
     for column in range(int(WIDTH / CELL_SIZE)):
         CELLS.append((column * CELL_SIZE, row * CELL_SIZE))
 
-render_q = NOT_BIG_FONT.render('Press "q" to save level1', 0, pygame.Color('green'))
-render_w = NOT_BIG_FONT.render('Press "w" to save level2', 0, pygame.Color('green'))
-render_e = NOT_BIG_FONT.render('Press "e" to save level3', 0, pygame.Color('green'))
-render_message1 = NOT_BIG_FONT.render('Press left mouse button', 0, pygame.Color('yellow'))
-render_message2 = NOT_BIG_FONT.render('to draw walls', 0, pygame.Color('yellow'))
-render_message3 = NOT_BIG_FONT.render('Press right mouse button', 0, pygame.Color('yellow'))
-render_message4 = NOT_BIG_FONT.render('to erase walls', 0, pygame.Color('yellow'))
-render_message5 = NOT_BIG_FONT.render('Press "d" keyboard button', 0, pygame.Color('yellow'))
-render_message6 = NOT_BIG_FONT.render('to draw portals', 0, pygame.Color('yellow'))
-render_message7 = NOT_BIG_FONT.render('Press "s" keyboard button', 0, pygame.Color('yellow'))
-render_message8 = NOT_BIG_FONT.render('to draw snake position', 0, pygame.Color('yellow'))
-render_message9 = NOT_BIG_FONT.render('Press space to erase all', 0, pygame.Color('red'))
-render_message10 = NOT_BIG_FONT.render(':3', 0, pygame.Color('red'))
+render_q = NOT_BIG_FONT.render('Press "q" to save level1',
+                               0, pygame.Color('green'))
+render_w = NOT_BIG_FONT.render('Press "w" to save level2',
+                               0, pygame.Color('green'))
+render_e = NOT_BIG_FONT.render('Press "e" to save level3',
+                               0, pygame.Color('green'))
+render_message1 = NOT_BIG_FONT.render('Press left mouse button',
+                                      0, pygame.Color('gray55'))
+render_message2 = NOT_BIG_FONT.render('to draw walls',
+                                      0, pygame.Color('gray55'))
+render_message3 = NOT_BIG_FONT.render('Press right mouse button',
+                                      0, pygame.Color('red'))
+render_message4 = NOT_BIG_FONT.render('to erase walls',
+                                      0, pygame.Color('red'))
+render_message5 = NOT_BIG_FONT.render('Press "d" keyboard button',
+                                      0, pygame.Color('white'))
+render_message6 = NOT_BIG_FONT.render('to draw portals',
+                                      0, pygame.Color('white'))
+render_message7 = NOT_BIG_FONT.render('Press "s" keyboard button',
+                                      0, pygame.Color('orange'))
+render_message8 = NOT_BIG_FONT.render('to draw snake position',
+                                      0, pygame.Color('orange'))
+render_message9 = NOT_BIG_FONT.render('Press space to erase all',
+                                      0, pygame.Color('red'))
+render_message10 = NOT_BIG_FONT.render(':3',
+                                       0, pygame.Color('red'))
 
 while True:
     surface.blit(IMAGE, (0, 0))
@@ -100,7 +113,6 @@ while True:
             for cell in CELLS:
                 if is_all_conditions(cell, WALLS, portals_temp, PORTALS):
                     WALLS.append((cell[0], cell[1]))
-                    pygame.display.update()
         # right mouse button
         if mouse[2]:
             for cell in CELLS:
@@ -111,7 +123,6 @@ while True:
                     for portal in PORTALS:
                         if cell[0] in portal and cell[1] in portal:
                             PORTALS.remove(portal)
-                            pygame.display.update()
                     if cell == SNAKE_CORDS:
                         is_snake_add = False
                         SNAKE_CORDS = ()
@@ -120,10 +131,10 @@ while True:
                 if is_all_conditions(cell, WALLS, portals_temp, PORTALS):
                     if is_portal_add:
                         portals_temp.append((cell[0], cell[1]))
-                        PORTALS.append((portals_temp[0][0], portals_temp[0][1], portals_temp[1][0], portals_temp[1][1]))
+                        PORTALS.append((portals_temp[0][0], portals_temp[0][1],
+                                        portals_temp[1][0], portals_temp[1][1]))
                         portals_temp.clear()
                         is_portal_add = False
-                        pygame.display.update()
                     else:
                         portals_temp.append((cell[0], cell[1]))
                         is_portal_add = True
@@ -147,4 +158,4 @@ while True:
             save_level('levels/level2.txt', WALLS, PORTALS)
         if key[pygame.K_e]:
             save_level('levels/level3.txt', WALLS, PORTALS)
-        pygame.time.Clock().tick(DELAY)
+    pygame.display.update()
