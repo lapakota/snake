@@ -2,24 +2,35 @@ import pygame
 from random import randrange
 
 pygame.init()
-
-WIDTH = 1400
-HEIGHT = 800
-CELL_SIZE = 40
-EYE_SIZE = 10
+# =========================Constants===========================
+# WIDTH and HEIGHT must be multiple of CELL_SIZE
+WIDTH = 1500
+HEIGHT = 900
+CELL_SIZE = 30
+# block_size for better look
+BLOCK_SIZE = CELL_SIZE - 1
+# -1 for better look
+EYE_SIZE = 9 - 1
 SOUND_DEATH = pygame.mixer.Sound('resources/death.wav')
 SOUND_EAT = pygame.mixer.Sound('resources/mmm.wav')
 IMAGE = pygame.image.load('resources/bg.png')
 ICON = pygame.image.load('resources/icon.png')
 NOT_BIG_FONT = pygame.font.SysFont('Arial', 26, bold=True)
 BIG_FONT = pygame.font.SysFont('Arial', 66, bold=True)
-
+# ==========================Colors=============================
+bg1_color = (161, 183, 107)
+bg2_color = (161, 193, 107)
+bg_fill_color = pygame.Color('gray20')
+snake_color = pygame.Color('orange')
+snake_eyes_color = pygame.Color('white')
+food_color = pygame.Color('red')
+speed_up_color = pygame.Color('yellow')
+speed_down_color = pygame.Color('blue')
+wall_color = pygame.Color('gray55')
+portals_color = pygame.Color('white')
+# =============================================================
 pygame.display.set_caption('SHAKE IT')
 pygame.display.set_icon(ICON)
-
-
-def clear_line(line, start_letter):
-    return line.replace(start_letter, '').replace('(', '').replace(')', '').replace(',', '')
 
 
 class Game:
@@ -38,6 +49,17 @@ class Game:
                 exit()
         if key[pygame.K_SPACE]:
             main()
+
+    @staticmethod
+    def draw_bg(surface):
+        for row in range(int(HEIGHT / CELL_SIZE)):
+            for column in range(int(WIDTH / CELL_SIZE)):
+                if (row + column) % 2 == 0:
+                    pygame.draw.rect(surface, bg1_color,
+                                     (column * CELL_SIZE, row * CELL_SIZE, BLOCK_SIZE, BLOCK_SIZE))
+                else:
+                    pygame.draw.rect(surface, bg2_color,
+                                     (column * CELL_SIZE, row * CELL_SIZE, BLOCK_SIZE, BLOCK_SIZE))
 
     def refresh_screen(self):
         pygame.display.flip()
@@ -88,12 +110,12 @@ class Game:
 
     def draw_hud(self, surface, game):
         if self.is_paused:
-            render_pause = BIG_FONT.render('PAUSE', 1, pygame.Color('red'))
-            surface.blit(render_pause, (600, 700))
-        render_score = NOT_BIG_FONT.render(f'Score: {self.score}', 1, pygame.Color('green'))
-        render_lives = NOT_BIG_FONT.render(f'Lives: {game.lives}', 1, pygame.Color('green'))
-        surface.blit(render_score, (20, 5))
-        surface.blit(render_lives, (1300, 5))
+            render_pause = BIG_FONT.render('PAUSE', 1, pygame.Color('black'))
+            surface.blit(render_pause, (WIDTH // 2 - 90, HEIGHT // 2 - 10))
+        render_score = NOT_BIG_FONT.render(f'Score: {self.score}', 1, pygame.Color('black'))
+        render_lives = NOT_BIG_FONT.render(f'Lives: {game.lives}', 1, pygame.Color('black'))
+        surface.blit(render_score, (CELL_SIZE // 1.5, 2))
+        surface.blit(render_lives, (WIDTH - CELL_SIZE * 3.5, 2))
 
     def game_over(self, surface, snake, walls, game, level):
         if snake.check_death(walls):
@@ -109,8 +131,9 @@ class Game:
                 game.fps_control.tick(game.fps - 9)
                 return
             while True:
-                render_end = BIG_FONT.render('PRESS SPACE TO RESTART', 1, pygame.Color('red'))
-                surface.blit(IMAGE, (0, 0))
+                render_end = BIG_FONT.render('PRESS SPACE TO RESTART', 1, pygame.Color('black'))
+                surface.fill(bg_fill_color)
+                game.draw_bg(surface)
                 surface.blit(render_end, (WIDTH // 2 - 350, HEIGHT // 2.5))
                 self.draw_hud(surface, self)
                 pygame.display.flip()
@@ -133,34 +156,34 @@ class Snake:
 
     def draw_snake(self, surface):
         # '+- 1 or 2' for perfect snake's eyes looking
-        [pygame.draw.rect(surface, pygame.Color(self.color),
-                          (i, j, CELL_SIZE - 1, CELL_SIZE - 1)) for i, j in self.body]
+        [pygame.draw.rect(surface, self.color,
+                          (i, j, BLOCK_SIZE, BLOCK_SIZE)) for i, j in self.body]
         if not self.dirs['S']:
-            pygame.draw.rect(surface, pygame.Color(self.eye_color),
+            pygame.draw.rect(surface, self.eye_color,
                              (self.x,
-                              self.y + CELL_SIZE - EYE_SIZE - 2,
+                              self.y + BLOCK_SIZE - EYE_SIZE,
                               EYE_SIZE, EYE_SIZE))
-            pygame.draw.rect(surface, pygame.Color(self.eye_color),
-                             (self.x + CELL_SIZE - EYE_SIZE - 1,
-                              self.y + CELL_SIZE - EYE_SIZE - 2,
+            pygame.draw.rect(surface, self.eye_color,
+                             (self.x + BLOCK_SIZE - EYE_SIZE,
+                              self.y + BLOCK_SIZE - EYE_SIZE,
                               EYE_SIZE, EYE_SIZE))
         elif not self.dirs['W']:
-            pygame.draw.rect(surface, pygame.Color(self.eye_color),
+            pygame.draw.rect(surface, self.eye_color,
                              (self.x,
-                              self.y + 1,
+                              self.y,
                               EYE_SIZE, EYE_SIZE))
-            pygame.draw.rect(surface, pygame.Color(self.eye_color),
-                             (self.x + CELL_SIZE - EYE_SIZE - 1,
-                              self.y + 1,
+            pygame.draw.rect(surface, self.eye_color,
+                             (self.x + BLOCK_SIZE - EYE_SIZE,
+                              self.y,
                               EYE_SIZE, EYE_SIZE))
         elif not self.dirs['D']:
-            pygame.draw.rect(surface, pygame.Color(self.eye_color),
-                             (self.x + CELL_SIZE - EYE_SIZE - 1,
-                              self.y + 1, EYE_SIZE, EYE_SIZE))
+            pygame.draw.rect(surface, self.eye_color,
+                             (self.x + BLOCK_SIZE - EYE_SIZE,
+                              self.y, EYE_SIZE, EYE_SIZE))
         elif not self.dirs['A']:
-            pygame.draw.rect(surface, pygame.Color(self.eye_color),
+            pygame.draw.rect(surface, self.eye_color,
                              (self.x,
-                              self.y + 1,
+                              self.y,
                               EYE_SIZE, EYE_SIZE))
 
     def eat_food(self, game, portals, walls, *food):
@@ -194,8 +217,8 @@ class Food:
         self.y = y
 
     def draw_food(self, surface):
-        pygame.draw.rect(surface, pygame.Color(self.color),
-                         (self.x, self.y, CELL_SIZE - 1, CELL_SIZE - 1))
+        pygame.draw.rect(surface, self.color,
+                         (self.x, self.y, BLOCK_SIZE, BLOCK_SIZE))
 
     def spawn_food(self, snake, portals, walls, *other_food):
         collision = False
@@ -247,10 +270,10 @@ class Portal:
         self.s_y = second_y
 
     def draw_portals(self, surface):
-        pygame.draw.rect(surface, pygame.Color(self.f_color),
-                         (self.f_x, self.f_y, CELL_SIZE - 1, CELL_SIZE - 1))
-        pygame.draw.rect(surface, pygame.Color(self.s_color),
-                         (self.s_x, self.s_y, CELL_SIZE - 1, CELL_SIZE - 1))
+        pygame.draw.rect(surface, self.f_color,
+                         (self.f_x, self.f_y, BLOCK_SIZE, BLOCK_SIZE))
+        pygame.draw.rect(surface, self.s_color,
+                         (self.s_x, self.s_y, BLOCK_SIZE, BLOCK_SIZE))
 
     def collision_with_portal(self, snake):
         if (snake.x, snake.y) == (self.f_x, self.f_y):
@@ -266,8 +289,8 @@ class Wall:
         self.color = color
 
     def draw_wall(self, surface):
-        pygame.draw.rect(surface, pygame.Color(self.color),
-                         (self.x, self.y, CELL_SIZE - 1, CELL_SIZE - 1))
+        pygame.draw.rect(surface, self.color,
+                         (self.x, self.y, BLOCK_SIZE, BLOCK_SIZE))
 
     def check_collision_with_wall(self, snake):
         if (self.x, self.y) == (snake.x, snake.y):
@@ -280,6 +303,13 @@ class Level:
         self.walls = []
         self.portals = []
         self.snake_cords = (0, 0)
+
+    @staticmethod
+    def clear_line(line, start_letter):
+        return line.replace(start_letter, '')\
+            .replace('(', '')\
+            .replace(')', '')\
+            .replace(',', '')
 
     def check_new_level(self, snake, game):
         if snake.length > 5 and game.score > 10 and self.type == 1:
@@ -299,18 +329,18 @@ class Level:
         with open(level, 'r') as file:
             for line in file:
                 if line[0] == 'w':
-                    line = clear_line(line, 'w')
+                    line = self.clear_line(line, 'w')
                     x, y = line.split(' ')
                     self.walls.append(Wall(int(x), int(y), wall.color))
                 if line[0] == 'p':
-                    line = clear_line(line, 'p')
+                    line = self.clear_line(line, 'p')
                     fx, fy, sx, sy = line.split(' ')
                     self.portals.append(Portal(int(fx), int(fy),
                                                int(sx), int(sy),
                                                portals.f_color,
                                                portals.s_color))
                 if line[0] == 's':
-                    line = clear_line(line, 's')
+                    line = self.clear_line(line, 's')
                     x, y = line.split(' ')
                     self.snake_cords = int(x), int(y)
 
@@ -326,16 +356,17 @@ class Level:
 def main():
     game = Game()
     surface = pygame.display.set_mode((WIDTH, HEIGHT))
-    p = Portal(0, 0, 0, 0, 'white', ' white')
-    w = Wall(0, 0, 'gray55')
+    p = Portal(0, 0, 0, 0, portals_color, portals_color)
+    w = Wall(0, 0, wall_color)
     level = Level()
+
     while True:
         level.load_level(w, p)
         snake = Snake(level.snake_cords[0], level.snake_cords[1],
-                      'orange', 'white')
-        apple = Food(0, 0, 'red')
-        speed_up_bonus = SpeedUp(0, 0, 'yellow')
-        speed_down_bonus = SpeedDown(0, 0, 'midnightblue')
+                      snake_color, snake_eyes_color)
+        apple = Food(0, 0, food_color)
+        speed_up_bonus = SpeedUp(0, 0, speed_up_color)
+        speed_down_bonus = SpeedDown(0, 0, speed_down_color)
 
         # initialize food
         apple.spawn_food(snake, level.portals, level.walls,
@@ -346,8 +377,9 @@ def main():
                                     speed_up_bonus, speed_down_bonus)
 
         while True:
-            # drawing bg image
-            surface.blit(IMAGE, (0, 0))
+            surface.fill(bg_fill_color)
+            # drawing bg grid
+            game.draw_bg(surface)
             # drawing walls, portals, snake, food,
             [wall.draw_wall(surface) for wall in level.walls]
             [portal.draw_portals(surface) for portal in level.portals]
@@ -366,7 +398,7 @@ def main():
                            apple, speed_up_bonus, speed_down_bonus)
             # screen refresh
             game.refresh_screen()
-            # close window if X button id pressed
+            # close window if X button is pressed
             game.close_game()
             # controls handler
             game.controls(snake)
