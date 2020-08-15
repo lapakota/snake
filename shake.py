@@ -13,7 +13,6 @@ BLOCK_SIZE = CELL_SIZE - 1
 EYE_SIZE = 9 - 1
 SOUND_DEATH = pygame.mixer.Sound('resources/death.wav')
 SOUND_EAT = pygame.mixer.Sound('resources/mmm.wav')
-IMAGE = pygame.image.load('resources/bg.png')
 ICON = pygame.image.load('resources/icon.png')
 NOT_BIG_FONT = pygame.font.SysFont('Arial', 26, bold=True)
 BIG_FONT = pygame.font.SysFont('Arial', 66, bold=True)
