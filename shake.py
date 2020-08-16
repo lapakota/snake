@@ -71,10 +71,12 @@ class Game:
                 snake._dx, snake._dy = snake.dx, snake.dy
                 snake.dx, snake.dy = 0, 0
                 self.is_paused = True
+                self.fps_control.tick(10)
                 return
             else:
                 snake.dx, snake.dy = snake._dx, snake._dy
                 self.is_paused = False
+                self.fps_control.tick(10)
                 return
         if key[pygame.K_w] or key[pygame.K_UP]:
             if snake.dirs['W'] and not self.is_paused:
@@ -127,7 +129,7 @@ class Game:
                 snake.dy = 0
                 snake.dirs = {'W': True, 'S': True, 'A': True, 'D': True, }
                 snake.length = 1
-                game.fps_control.tick(game.fps - 9)
+                game.fps_control.tick(6)
                 return
             while True:
                 render_end = BIG_FONT.render('PRESS SPACE TO RESTART', 1, pygame.Color('black'))
