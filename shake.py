@@ -1,12 +1,13 @@
-import pygame
 from random import randrange
+
+import pygame
 
 pygame.init()
 # =========================Constants===========================
 # WIDTH and HEIGHT must be multiple of CELL_SIZE
 WIDTH = 1500
 HEIGHT = 900
-CELL_SIZE = 30
+CELL_SIZE = 25
 # block_size for better look
 BLOCK_SIZE = CELL_SIZE - 1
 # -1 for better look
@@ -17,16 +18,16 @@ ICON = pygame.image.load('resources/icon.png')
 NOT_BIG_FONT = pygame.font.SysFont('Arial', 26, bold=True)
 BIG_FONT = pygame.font.SysFont('Arial', 66, bold=True)
 # ==========================Colors=============================
-bg1_color = (161, 183, 107)
-bg2_color = (161, 193, 107)
+bg1_color = (30, 150, 120)
+bg2_color = (30, 159, 120)
 bg_fill_color = pygame.Color('gray20')
-snake_color = pygame.Color('orange')
+snake_color = (236, 160, 40)
 snake_eyes_color = pygame.Color('white')
-food_color = pygame.Color('red')
-speed_up_color = pygame.Color('yellow')
-speed_down_color = pygame.Color('blue')
+food_color = (255, 54, 60)
+speed_up_color = (239, 218, 7)
+speed_down_color = (134, 173, 247)
 wall_color = pygame.Color('gray55')
-portals_color = pygame.Color('white')
+portals_color = (244, 242, 246)
 # =============================================================
 pygame.display.set_caption('SHAKE IT')
 pygame.display.set_icon(ICON)
@@ -55,10 +56,12 @@ class Game:
             for column in range(int(WIDTH / CELL_SIZE)):
                 if (row + column) % 2 == 0:
                     pygame.draw.rect(surface, bg1_color,
-                                     (column * CELL_SIZE, row * CELL_SIZE, BLOCK_SIZE, BLOCK_SIZE))
+                                     (column * CELL_SIZE, row * CELL_SIZE,
+                                      BLOCK_SIZE, BLOCK_SIZE))
                 else:
                     pygame.draw.rect(surface, bg2_color,
-                                     (column * CELL_SIZE, row * CELL_SIZE, BLOCK_SIZE, BLOCK_SIZE))
+                                     (column * CELL_SIZE, row * CELL_SIZE,
+                                      BLOCK_SIZE, BLOCK_SIZE))
 
     def refresh_screen(self):
         pygame.display.flip()
@@ -202,10 +205,10 @@ class Snake:
             self.body = self.body[-self.length:]
 
     def check_death(self, walls):
-        if self.x < 0\
-                or self.x > WIDTH - CELL_SIZE\
-                or self.y < 0\
-                or self.y > HEIGHT - CELL_SIZE\
+        if self.x < 0 \
+                or self.x > WIDTH - CELL_SIZE \
+                or self.y < 0 \
+                or self.y > HEIGHT - CELL_SIZE \
                 or len(self.body) != len(set(self.body)) \
                 or True in [wall.check_collision_with_wall(self) for wall in walls]:
             return True
@@ -228,13 +231,13 @@ class Food:
         for piece in other_food:
             food_cords.append((piece.x, piece.y))
         while not collision:
-            x, y = randrange(CELL_SIZE, WIDTH - CELL_SIZE, CELL_SIZE),\
+            x, y = randrange(CELL_SIZE, WIDTH - CELL_SIZE, CELL_SIZE), \
                    randrange(CELL_SIZE, HEIGHT - CELL_SIZE, CELL_SIZE)
-            if (x, y) not in snake.body\
-                    and (x, y) not in portal_cords\
-                    and (x, y) not in food_cords\
-                    and (x, y) not in [(wall.x, wall.y) for wall in walls]\
-                    and (x, y) not in [(portal.f_x, portal.f_y) for portal in portals]\
+            if (x, y) not in snake.body \
+                    and (x, y) not in portal_cords \
+                    and (x, y) not in food_cords \
+                    and (x, y) not in [(wall.x, wall.y) for wall in walls] \
+                    and (x, y) not in [(portal.f_x, portal.f_y) for portal in portals] \
                     and (x, y) not in [(portal.s_x, portal.s_y) for portal in portals]:
                 self.x = x
                 self.y = y
@@ -307,9 +310,9 @@ class Level:
 
     @staticmethod
     def clear_line(line, start_letter):
-        return line.replace(start_letter, '')\
-            .replace('(', '')\
-            .replace(')', '')\
+        return line.replace(start_letter, '') \
+            .replace('(', '') \
+            .replace(')', '') \
             .replace(',', '')
 
     def check_new_level(self, snake, game):
