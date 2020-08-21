@@ -1,5 +1,6 @@
 import pygame
-from shake import WIDTH, HEIGHT, CELL_SIZE, NOT_BIG_FONT, Portal,\
+
+from shake import WIDTH, HEIGHT, CELL_SIZE, NOT_BIG_FONT, Portal, \
     Wall, Game, BLOCK_SIZE, snake_color, bg_fill_color, \
     wall_color, portals_color
 
@@ -95,7 +96,8 @@ def main():
         # draw snake position
         if is_snake_add:
             pygame.draw.rect(surface, snake_color,
-                             (snake_cords[0], snake_cords[1], CELL_SIZE, CELL_SIZE))
+                             (snake_cords[0], snake_cords[1],
+                              BLOCK_SIZE, BLOCK_SIZE))
         for wall in walls:
             pygame.draw.rect(surface, wall_color,
                              (wall[0], wall[1], BLOCK_SIZE, BLOCK_SIZE))
@@ -107,7 +109,8 @@ def main():
         # draw single portal that don't have partner
         if is_portal_add:
             pygame.draw.rect(surface, single_portal_color,
-                             (portals_temp[0][0], portals_temp[0][1], CELL_SIZE, CELL_SIZE))
+                             (portals_temp[0][0], portals_temp[0][1],
+                              BLOCK_SIZE, BLOCK_SIZE))
         # draw help text
         draw_messages(surface)
 
