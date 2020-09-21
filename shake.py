@@ -1,3 +1,4 @@
+import sys
 from random import randrange
 
 import pygame
@@ -15,7 +16,7 @@ EYE_SIZE = 9 - 1
 SOUND_DEATH = pygame.mixer.Sound('resources/death.wav')
 SOUND_EAT = pygame.mixer.Sound('resources/mmm.wav')
 ICON = pygame.image.load('resources/icon.png')
-NOT_BIG_FONT = pygame.font.SysFont('Arial', 26, bold=True)
+NOT_BIG_FONT = pygame.font.SysFont('Arial', 22, bold=True)
 BIG_FONT = pygame.font.SysFont('Arial', 66, bold=True)
 # ==========================Colors=============================
 bg1_color = (30, 150, 120)
@@ -36,19 +37,10 @@ pygame.display.set_icon(ICON)
 class Game:
     def __init__(self):
         self.fps_control = pygame.time.Clock()
-        self.fps = 10
+        self.fps = 7
         self.score = 0
         self.lives = 3
         self.is_paused = False
-
-    @staticmethod
-    def close_game():
-        key = pygame.key.get_pressed()
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                exit()
-        if key[pygame.K_SPACE]:
-            main()
 
     @staticmethod
     def draw_bg(surface):
@@ -67,50 +59,46 @@ class Game:
         pygame.display.flip()
         self.fps_control.tick(self.fps)
 
-    def controls(self, snake):
-        key = pygame.key.get_pressed()
-        if key[pygame.K_ESCAPE]:
-            if not self.is_paused:
-                snake._dx, snake._dy = snake.dx, snake.dy
-                snake.dx, snake.dy = 0, 0
-                self.is_paused = True
-                self.fps_control.tick(10)
-                return
-            else:
-                snake.dx, snake.dy = snake._dx, snake._dy
-                self.is_paused = False
-                self.fps_control.tick(10)
-                return
-        if key[pygame.K_w] or key[pygame.K_UP]:
-            if snake.dirs['W'] and not self.is_paused:
-                snake.dx, snake.dy = 0, -1
-                snake.dirs = {'W': True, 'S': False, 'A': True, 'D': True, }
-                return
-        if key[pygame.K_s] or key[pygame.K_DOWN]:
-            if snake.dirs['S'] and not self.is_paused:
-                snake.dx, snake.dy = 0, 1
-                snake.dirs = {'W': False, 'S': True, 'A': True, 'D': True, }
-                return
-        if key[pygame.K_a] or key[pygame.K_LEFT]:
-            if snake.dirs['A'] and not self.is_paused:
-                snake.dx, snake.dy = -1, 0
-                snake.dirs = {'W': True, 'S': True, 'A': True, 'D': False, }
-                return
-        if key[pygame.K_d] or key[pygame.K_RIGHT]:
-            if snake.dirs['D'] and not self.is_paused:
-                snake.dx, snake.dy = 1, 0
-                snake.dirs = {'W': True, 'S': True, 'A': False, 'D': True, }
-                return
-        # cheats
-        if key[pygame.K_x]:
-            snake.length += 1
-            self.score += 1
-        if key[pygame.K_c]:
-            self.fps += 1
-        if key[pygame.K_v]:
-            self.fps -= 1
-        if key[pygame.K_z]:
-            self.lives += 99
+    def controls_handler(self, snake, buffer):
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if event.key in [pygame.K_ESCAPE]:
+                    if not self.is_paused:
+                        snake._dx, snake._dy = snake.dx, snake.dy
+                        snake.dx, snake.dy = 0, 0
+                        self.is_paused = True
+                        self.fps_control.tick(10)
+                    else:
+                        snake.dx, snake.dy = snake._dx, snake._dy
+                        self.is_paused = False
+                        self.fps_control.tick(10)
+                if event.key in [pygame.K_UP, pygame.K_w]:
+                    buffer.append('up')
+                if event.key in [pygame.K_DOWN, pygame.K_s]:
+                    buffer.append('down')
+                if event.key in [pygame.K_RIGHT, pygame.K_d]:
+                    buffer.append('right')
+                if event.key in [pygame.K_LEFT, pygame.K_a]:
+                    buffer.append('left')
+                # cheats
+                if event.key in [pygame.K_x]:
+                    snake.length += 1
+                    self.score += 1
+                if event.key in [pygame.K_c]:
+                    self.fps += 1
+                if event.key in [pygame.K_v]:
+                    self.fps -= 1
+                if event.key in [pygame.K_z]:
+                    self.lives += 99
+                # restart
+                if event.key in [pygame.K_SPACE]:
+                    main()
+            elif event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+        if not buffer:
+            buffer.append(None)
+        return buffer
 
     def draw_hud(self, surface, game):
         if self.is_paused:
@@ -118,8 +106,8 @@ class Game:
             surface.blit(render_pause, (WIDTH // 2 - 90, HEIGHT // 2 - 10))
         render_score = NOT_BIG_FONT.render(f'Score: {self.score}', 1, pygame.Color('black'))
         render_lives = NOT_BIG_FONT.render(f'Lives: {game.lives}', 1, pygame.Color('black'))
-        surface.blit(render_score, (CELL_SIZE // 1.5, 2))
-        surface.blit(render_lives, (WIDTH - CELL_SIZE * 3.5, 2))
+        surface.blit(render_score, (int(CELL_SIZE // 1.5), 2))
+        surface.blit(render_lives, (int(WIDTH - CELL_SIZE * 3.5), 2))
 
     def game_over(self, surface, snake, walls, game, level):
         if snake.check_death(walls):
@@ -130,7 +118,7 @@ class Game:
                 snake.body = [(snake.x, snake.y)]
                 snake.dx = 0
                 snake.dy = 0
-                snake.dirs = {'W': True, 'S': True, 'A': True, 'D': True, }
+                snake.dirs = 'all'
                 snake.length = 1
                 game.fps_control.tick(6)
                 return
@@ -138,10 +126,10 @@ class Game:
                 render_end = BIG_FONT.render('PRESS SPACE TO RESTART', 1, pygame.Color('black'))
                 surface.fill(bg_fill_color)
                 game.draw_bg(surface)
-                surface.blit(render_end, (WIDTH // 2 - 350, HEIGHT // 2.5))
+                surface.blit(render_end, (int(WIDTH // 2 - 350), int(HEIGHT // 2.5)))
                 self.draw_hud(surface, self)
                 pygame.display.flip()
-                self.close_game()
+                self.controls_handler(snake, buffer=[])
 
 
 class Snake:
@@ -156,13 +144,13 @@ class Snake:
         self.dy = 0
         self._dx = 0
         self._dy = 0
-        self.dirs = {'W': True, 'S': True, 'A': True, 'D': True, }
+        self.dirs = 'all'
 
     def draw_snake(self, surface):
         # '+- 1 or 2' for perfect snake's eyes looking
         [pygame.draw.rect(surface, self.color,
                           (i, j, BLOCK_SIZE, BLOCK_SIZE)) for i, j in self.body]
-        if not self.dirs['S']:
+        if self.dirs == 'up':
             pygame.draw.rect(surface, self.eye_color,
                              (self.x,
                               self.y + BLOCK_SIZE - EYE_SIZE,
@@ -171,7 +159,7 @@ class Snake:
                              (self.x + BLOCK_SIZE - EYE_SIZE,
                               self.y + BLOCK_SIZE - EYE_SIZE,
                               EYE_SIZE, EYE_SIZE))
-        elif not self.dirs['W']:
+        elif self.dirs == 'down':
             pygame.draw.rect(surface, self.eye_color,
                              (self.x,
                               self.y,
@@ -180,11 +168,11 @@ class Snake:
                              (self.x + BLOCK_SIZE - EYE_SIZE,
                               self.y,
                               EYE_SIZE, EYE_SIZE))
-        elif not self.dirs['D']:
+        elif self.dirs == 'left':
             pygame.draw.rect(surface, self.eye_color,
                              (self.x + BLOCK_SIZE - EYE_SIZE,
                               self.y, EYE_SIZE, EYE_SIZE))
-        elif not self.dirs['A']:
+        elif self.dirs == 'right':
             pygame.draw.rect(surface, self.eye_color,
                              (self.x,
                               self.y,
@@ -203,6 +191,21 @@ class Snake:
             self.y += self.dy * CELL_SIZE
             self.body.append((self.x, self.y))
             self.body = self.body[-self.length:]
+
+    def change_direction(self, buffer):
+        if buffer is not None:
+            if buffer[0] == 'up' and self.dirs != 'down':
+                self.dx, self.dy = 0, -1
+                self.dirs = buffer[0]
+            if buffer[0] == 'down' and self.dirs != 'up':
+                self.dx, self.dy = 0, 1
+                self.dirs = buffer[0]
+            if buffer[0] == 'right' and self.dirs != 'left':
+                self.dx, self.dy = 1, 0
+                self.dirs = buffer[0]
+            if buffer[0] == 'left' and self.dirs != 'right':
+                self.dx, self.dy = -1, 0
+                self.dirs = buffer[0]
 
     def check_death(self, walls):
         if self.x < 0 \
@@ -257,9 +260,9 @@ class SpeedUp(Food):
 class SpeedDown(Food):
     def give_bonus(self, snake, game):
         # lower fps is bad for game experience
-        if game.fps > 8:
-            game.fps -= 2
-        game.score -= 1
+        if game.fps > 3:
+            game.fps -= 1
+        game.score -= 2
 
 
 class Portal:
@@ -363,6 +366,7 @@ def main():
     p = Portal(0, 0, 0, 0, portals_color, portals_color)
     w = Wall(0, 0, wall_color)
     level = Level()
+    buffer = ['all']
 
     while True:
         level.load_level(w, p)
@@ -381,6 +385,10 @@ def main():
                                     speed_up_bonus, speed_down_bonus)
 
         while True:
+            buffer = game.controls_handler(snake, buffer)
+            if len(buffer) > 2:
+                buffer.pop(0)
+            snake.change_direction(buffer)
             surface.fill(bg_fill_color)
             # drawing bg grid
             game.draw_bg(surface)
@@ -402,10 +410,7 @@ def main():
                            apple, speed_up_bonus, speed_down_bonus)
             # screen refresh
             game.refresh_screen()
-            # close window if X button is pressed
-            game.close_game()
-            # controls handler
-            game.controls(snake)
+            buffer.pop(0)
             # game over
             game.game_over(surface, snake, level.walls, game, level)
             # transition to new level
