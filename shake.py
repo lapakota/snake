@@ -410,6 +410,7 @@ def main():
                            apple, speed_up_bonus, speed_down_bonus)
             # screen refresh
             game.refresh_screen()
+            # clearing from the action made
             buffer.pop(0)
             # game over
             game.game_over(surface, snake, level.walls, game, level)
