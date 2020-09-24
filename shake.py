@@ -182,7 +182,7 @@ class Snake:
         for piece in food:
             if self.body[-1] == (piece.x, piece.y):
                 SOUND_EAT.play()
-                piece.spawn_food(self, walls, portals)
+                piece.spawn_food(self, walls, portals, *food)
                 piece.give_bonus(self, game)
 
     def move_snake(self, game):
@@ -378,15 +378,15 @@ def main():
 
         # initialize food
         apple.spawn_food(snake, level.portals, level.walls,
-                         speed_up_bonus, speed_down_bonus)
+                         speed_up_bonus, speed_down_bonus, apple)
         speed_up_bonus.spawn_food(snake, level.portals, level.walls,
-                                  speed_up_bonus, speed_down_bonus)
+                                  speed_up_bonus, speed_down_bonus, apple)
         speed_down_bonus.spawn_food(snake, level.portals, level.walls,
-                                    speed_up_bonus, speed_down_bonus)
+                                    speed_up_bonus, speed_down_bonus, apple)
 
         while True:
             buffer = game.controls_handler(snake, buffer)
-            if len(buffer) > 2:
+            if len(buffer) > 3:
                 buffer.pop(0)
             snake.change_direction(buffer)
             surface.fill(bg_fill_color)
@@ -410,7 +410,7 @@ def main():
                            apple, speed_up_bonus, speed_down_bonus)
             # screen refresh
             game.refresh_screen()
-            # clearing from the action made
+            # clear buffer
             buffer.pop(0)
             # game over
             game.game_over(surface, snake, level.walls, game, level)
